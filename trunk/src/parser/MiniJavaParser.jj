@@ -20,7 +20,7 @@ public class MiniJavaParser
   {
       try
       {
-         FileInputStream fi = new FileInputStream("D://Desktop//UFC//Projetos//Eclipse Java Standart Edition//Compilaporra//src//parser//Sample8.txt");
+         FileInputStream fi = new FileInputStream("D://Desktop//UFC//Projetos//Eclipse Java Standart Edition//CompilerGroupNine//trunk//src//parser//Sample4.txt");
       	 System.setIn(fi);
           Program p = new MiniJavaParser(System.in).Goal();
           System.out.println("Lexical analysis successfull\n\n");
@@ -102,30 +102,6 @@ TOKEN : {
 | < ID: <LETTER> (<LETTER> | "_" | <DIGIT>)* >
 | < NUM: (<DIGIT>)+ >
 }
-
-
-
-int Start() :
-{
-Token t;
-int i;
-int value;
-}
-{
-	t = <NUM> 
-	{ i = Integer.parseInt(t.image); }
-	{ value = i; }
-	
-	(
-		<PLUS>
-		t = <NUM>
-		{ i = Integer.parseInt(t.image); }
-		{ value += i; }
-	)*		
-	<EOF>
-	{ return value; }
-}
-
 
 /*
 *	MiniJava Grammar
@@ -404,9 +380,12 @@ Statement Statement () :
 }
 
 Exp Exp() :
-{ Exp exp; }
+{
+	Exp exp;
+}
 { 
-	( LOOKAHEAD( ExpSingle() <AND> ) exp = AndExp()
+	(
+	  LOOKAHEAD( ExpSingle() <AND> ) exp = AndExp()
 	| LOOKAHEAD( ExpSingle() <LESS> ) exp =  LessThanExp()
 	| LOOKAHEAD( ExpSingle() <PLUS> ) exp= PlusExp()
 	| LOOKAHEAD( ExpSingle() <MINUS> ) exp = MinusExp()
@@ -414,12 +393,17 @@ Exp Exp() :
 	| LOOKAHEAD( ExpSingle() <LBRACKET> ) exp = ArrayLookup()
 	| LOOKAHEAD( ExpSingle() <DOT> <LENGTH> ) exp = ArrayLength()	
 	| LOOKAHEAD( ExpSingle() <DOT> ID() <LPAREN> ) exp = CallExp()		
-	| exp = ExpSingle() )
-	{ return exp; }
+	| exp = ExpSingle()
+	)
+	{
+		return exp;
+	}
 }
 
 Exp AndExp() :
-{ Exp exp1,exp2; }
+{
+  Exp exp1,exp2;
+}
 { 
   exp1 = ExpSingle() <AND> exp2 = ExpSingle()
   { return new And(exp1,exp2); }
@@ -471,8 +455,6 @@ Exp ArrayLength() :
   { return new ArrayLength(exp); }
 }
 
-
-//Expressoes que nao possuem recursão à esquerda!!
 Exp ExpSingle() :
 { 
   Token token; 
@@ -484,10 +466,10 @@ Exp ExpSingle() :
 | token = <ID> { return new IdentifierExp(token.image); }
 | <THIS> { return new This(); }
 | LOOKAHEAD(3) 
-  exp = ExpAlocateArray()  //new int [Exp]
-| exp = ExpAlocate()       //new id ()
-| exp = ExpNot()            //!Exp
-| exp = ExpPar() )         //(Exp)
+  exp = ExpAlocateArray()  
+| exp = ExpAlocate()       
+| exp = ExpNot()            
+| exp = ExpPar() )       
 { return exp; }
 }
 

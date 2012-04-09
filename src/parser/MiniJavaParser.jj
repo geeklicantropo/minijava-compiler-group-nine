@@ -1,0 +1,587 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.17+ wizard for JavaCC 1.5.0+
+ */
+options
+{
+  JDK_VERSION = "1.5";
+  static = true;
+}
+
+PARSER_BEGIN(MiniJavaParser)
+package parser;
+import syntaxtree.*;
+import visitor.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+public class MiniJavaParser
+{
+  public static void main(String args []) throws ParseException, FileNotFoundException
+  {
+      try
+      {
+         FileInputStream fi = new FileInputStream("D://Desktop//UFC//Projetos//Eclipse Java Standart Edition//Compilaporra//src//parser//Sample8.txt");
+      	 System.setIn(fi);
+          Program p = new MiniJavaParser(System.in).Goal();
+          System.out.println("Lexical analysis successfull\n\n");
+          //p.accept(new PrettyPrintVisitor());
+          //SymbolTableCreatorVisitor symbolTable = new SymbolTableCreatorVisitor();
+          //p.accept(symbolTable);         
+      }
+      catch (ParseException e)
+      {
+        System.out.println("Lexer Error");
+        System.out.println(e.getMessage());
+
+      }
+      catch (Error e)
+      {
+        System.out.println("Oops.");
+        System.out.println(e.getMessage());
+      }
+
+  }
+}
+
+PARSER_END(MiniJavaParser)
+
+
+SKIP: {
+  " "
+| "\n"
+| "\r" 
+| "\r\n"
+| "\t"
+}
+
+/* Palavras Reservadas*/
+TOKEN :
+{
+  < AND: "&&" >
+| < LESS: "<" >
+| < EQUAL: "=" >
+| < TIMES: "*" >
+| < PLUS: "+" >
+| < MINUS: "-" >
+| < CLASS: "class" >
+| < PUBLIC: "public" >
+| < STATIC: "static" >
+| < VOID: "void" >
+| < MAIN: "main" >
+| < STRING: "String" >
+| < EXTENDS: "extends" >
+| < LENGTH: "length" >
+| < RETURN: "return" >
+| < INT: "int" >
+| < LBRACKET: "[" >
+| < RBRACKET: "]" >
+| < LPAREN: "(" >
+| < RPAREN: ")" >
+| < LBRACE: "{" >
+| < RBRACE: "}" >
+| < SEMICOLON: ";" >
+| < COMMA: "," >
+| < DOT: "." >
+| < NEW: "new" >
+| < BOOLEAN: "boolean" > 
+| < IF: "if" >
+| < ELSE: "else" >
+| < WHILE: "while" > 
+| < PRINT: "System.out.println" >
+| < TRUE: "true" >
+| < FALSE: "false" >
+| < THIS: "this" >
+| < NOT: "!" >
+| < DOLAR: "$" >
+}
+
+/* Identificadores */
+TOKEN : {
+  < #DIGIT: ["0"-"9"] >
+| < #LETTER: ["a"-"z"]|["A"-"Z"] >
+| < ID: <LETTER> (<LETTER> | "_" | <DIGIT>)* >
+| < NUM: (<DIGIT>)+ >
+}
+
+
+
+int Start() :
+{
+Token t;
+int i;
+int value;
+}
+{
+	t = <NUM> 
+	{ i = Integer.parseInt(t.image); }
+	{ value = i; }
+	
+	(
+		<PLUS>
+		t = <NUM>
+		{ i = Integer.parseInt(t.image); }
+		{ value += i; }
+	)*		
+	<EOF>
+	{ return value; }
+}
+
+
+/*
+*	MiniJava Grammar
+**/
+
+Program Goal():
+{
+	Program program = Program();
+}
+{
+	< EOF >
+	{
+    	System.out.println("Todos os tokens foram reconhecidos.");
+    	return program;
+	}
+}
+
+
+Program Program () :
+{
+	MainClass mainClass;
+	ClassDecl classDecl;
+	ClassDeclList classDeclList = new ClassDeclList();
+}
+{
+   mainClass = MainClass()
+   (classDecl = ClassDecl() { classDeclList.addElement(classDecl);  })*
+   < EOF >
+  {
+    return new Program(mainClass, classDeclList);
+  }
+}
+
+
+MainClass MainClass():
+{
+  Token idClass;
+  Token idArgs;
+  Statement stm;
+}
+{
+  < CLASS >
+  idClass = < ID >
+  < LBRACE >
+  < PUBLIC >
+  < STATIC >
+  < VOID >
+  < MAIN >
+  < LPAREN >
+  < STRING >
+  < LBRACKET >
+  < RBRACKET >
+  idArgs = < ID >
+  < RPAREN >
+  < LBRACE >
+  stm = Statement()
+  < RBRACE >
+  < RBRACE >
+  {
+   	return new MainClass(new Identifier(idClass.image), new Identifier(idArgs.image), stm);
+  }
+}
+
+
+ClassDecl ClassDecl () :
+{
+	Token idClass;
+	VarDecl varDecl;
+	VarDeclList varDeclList = new VarDeclList();
+	MethodDecl methodDecl;
+	MethodDeclList methodDeclList = new MethodDeclList();
+	Token idExtends;
+}
+{
+	LOOKAHEAD (3)
+	< CLASS >
+	idClass = < ID >
+	< LBRACE >
+	(varDecl = VarDecl() { varDeclList.addElement(varDecl);	})*
+	(methodDecl = MethodDecl() { methodDeclList.addElement(methodDecl);})*
+	< RBRACE >
+	{
+		return  new ClassDeclSimple(new Identifier(idClass.image), varDeclList, methodDeclList);
+	}
+	
+   |LOOKAHEAD (3)
+    < CLASS >
+    idClass = < ID >
+    < EXTENDS >
+    idExtends = < ID >
+    < LBRACE >
+ 	(varDecl = VarDecl() { varDeclList.addElement(varDecl);	})*
+	(methodDecl = MethodDecl(){ methodDeclList.addElement(methodDecl);})*
+    < RBRACE >
+    {
+    	return new ClassDeclExtends(new Identifier(idClass.image), new Identifier(idExtends.image), varDeclList, methodDeclList);
+    }
+}
+
+
+VarDecl VarDecl () :
+{
+	Type type;
+	Token id;
+}
+{
+  type = Type()
+  id = < ID >
+  < SEMICOLON >
+  {
+  	return new VarDecl(type, new Identifier(id.image));	
+  }
+}
+
+
+MethodDecl MethodDecl():
+{
+	Type type;
+	Token id;
+	FormalList formalList = new FormalList();
+	VarDecl varDecl;
+	VarDeclList varDeclList = new VarDeclList();
+	Statement stm;
+    StatementList stmList = new StatementList();
+    Exp exp;
+}
+{
+  < PUBLIC >
+  type = Type()
+  id = < ID >
+  < LPAREN >
+  formalList = FormalList()
+  < RPAREN  > < LBRACE >
+  ( LOOKAHEAD(2) varDecl = VarDecl() { varDeclList.addElement(varDecl); })*
+  (stm = Statement()  { stmList.addElement(stm); })*
+  < RETURN >
+  exp = Exp()
+  < SEMICOLON > < RBRACE >
+  {
+  	return new MethodDecl(type, new Identifier(id.image), formalList, varDeclList, stmList, exp);
+  }
+}
+
+
+FormalList FormalList () :
+{
+	Type type;
+	Token id;
+	Formal formal;
+	FormalList formalList = new FormalList();
+}
+{
+	type = Type()
+	id = < ID >	{ formalList.addElement(new Formal(type, new Identifier(id.image)));	}
+	(formal = FormalRest(){ formalList.addElement(formal); })*
+	{
+	  return formalList;
+	}
+	
+	|
+	{
+	  return new FormalList();
+	}
+}
+
+
+Formal FormalRest():
+{
+	Type type;
+	Token id;
+}
+{
+  < COMMA >
+  type = Type()
+  id = < ID >
+  {
+  	return new Formal(type, new Identifier(id.image));  
+  }
+}
+
+
+Type Type():
+{
+	Token id;
+}
+{
+	 LOOKAHEAD(2)
+	 < INT >
+	 < LBRACKET >
+	 < RBRACKET >
+	 {
+	 	return new IntArrayType();
+	 }
+
+	|< BOOLEAN >
+	 {
+	 	return new BooleanType();
+	 }
+
+	|< INT >
+	 {
+	 	return new IntegerType();
+	 }
+
+	|id = < ID >
+	 {
+	 	return new IdentifierType(id.image);
+	 }
+}
+
+
+Statement Statement () :
+{
+	Statement stm1, stm2;
+	StatementList stmList = new StatementList();
+	Exp exp, exp2;
+	Token id;
+}
+{
+	 < LBRACE >
+	 ( stm1 = Statement() {stmList.addElement(stm1);} )*
+	 < RBRACE>
+	 {
+	 	return new Block(stmList);
+	 }
+	 
+	|< IF >
+	 < LPAREN >
+	 exp = Exp()
+	 < RPAREN >
+	 stm1 = Statement()
+	 < ELSE >
+	 stm2 = Statement()
+	 {
+	 	return new If(exp, stm1, stm2);
+	 }
+	 
+	|< WHILE >
+	 < LPAREN >
+	 exp = Exp()
+	 < RPAREN >
+	 stm1 = Statement()
+	 {
+	 	return new While(exp, stm1);
+	 }
+	  
+	|< PRINT >
+	 < LPAREN >
+	 exp = Exp()
+	 < RPAREN >
+	 < SEMICOLON >
+	 {
+	 	return new Print(exp);
+	 }
+	 
+	|LOOKAHEAD (2)
+	 id = < ID >
+	 < EQUAL >
+	 exp = Exp()
+	 < SEMICOLON >
+	 {
+	 	return new Assign(new Identifier(id.image),exp);
+	 }
+	 
+	|LOOKAHEAD (2)
+	 id = < ID >
+	 < LBRACKET >
+	 < RBRACKET >
+	 exp = Exp()
+	 <  EQUAL >
+	 exp2 = Exp()
+	 < SEMICOLON >
+	 {
+		return new ArrayAssign(new Identifier(id.image),exp, exp2);
+	 }
+}
+
+Exp Exp() :
+{ Exp exp; }
+{ 
+	( LOOKAHEAD( ExpSingle() <AND> ) exp = AndExp()
+	| LOOKAHEAD( ExpSingle() <LESS> ) exp =  LessThanExp()
+	| LOOKAHEAD( ExpSingle() <PLUS> ) exp= PlusExp()
+	| LOOKAHEAD( ExpSingle() <MINUS> ) exp = MinusExp()
+	| LOOKAHEAD( ExpSingle() <TIMES> ) exp = TimesExp()
+	| LOOKAHEAD( ExpSingle() <LBRACKET> ) exp = ArrayLookup()
+	| LOOKAHEAD( ExpSingle() <DOT> <LENGTH> ) exp = ArrayLength()	
+	| LOOKAHEAD( ExpSingle() <DOT> ID() <LPAREN> ) exp = CallExp()		
+	| exp = ExpSingle() )
+	{ return exp; }
+}
+
+Exp AndExp() :
+{ Exp exp1,exp2; }
+{ 
+  exp1 = ExpSingle() <AND> exp2 = ExpSingle()
+  { return new And(exp1,exp2); }
+}
+
+Exp LessThanExp() :
+{ Exp exp1,exp2; }
+{ 
+  exp1 = ExpSingle() <LESS> exp2 = ExpSingle()
+  { return new LessThan(exp1,exp2); }
+}
+
+Exp PlusExp() :
+{ Exp exp1,exp2; }
+{ 
+  exp1 = ExpSingle() <PLUS> exp2 = ExpSingle()
+  { return new Plus(exp1,exp2); }
+}
+
+Exp MinusExp() :
+{ Exp exp1,exp2; }
+{ 
+  exp1 = ExpSingle() <MINUS> exp2 = ExpSingle()
+  { return new Minus(exp1,exp2); }
+}
+
+Exp TimesExp() :
+{ Exp exp1,exp2; }
+{ 
+  exp1 = ExpSingle() <TIMES> exp2 = ExpSingle()
+  { return new Times(exp1,exp2); }
+}
+
+Exp ArrayLookup() :
+{ 
+	Exp exp1 , exp2 ; 
+ }
+{ 
+  exp1 = ExpSingle() <LBRACKET> exp2 = ExpSingle() <RBRACKET>
+  { 
+	return new ArrayLookup(exp1,exp2); 
+   }
+}
+
+Exp ArrayLength() :
+{ Exp exp; }
+{ 
+  exp = ExpSingle() <DOT> <LENGTH>
+  { return new ArrayLength(exp); }
+}
+
+
+//Expressoes que nao possuem recursão à esquerda!!
+Exp ExpSingle() :
+{ 
+  Token token; 
+  Exp exp; }
+{ 
+( token = < NUM > { return new IntegerLiteral(Integer.parseInt(token.image)); }
+| <TRUE> { return new True(); }
+| <FALSE> { return new False(); }
+| token = <ID> { return new IdentifierExp(token.image); }
+| <THIS> { return new This(); }
+| LOOKAHEAD(3) 
+  exp = ExpAlocateArray()  //new int [Exp]
+| exp = ExpAlocate()       //new id ()
+| exp = ExpNot()            //!Exp
+| exp = ExpPar() )         //(Exp)
+{ return exp; }
+}
+
+Exp ExpAlocateArray() :
+{ Exp exp; }
+{ <NEW> <INT> <LBRACKET> exp = Exp() <RBRACKET>
+{ return new NewArray(exp); }
+}
+
+Exp CallExp() :
+{
+  Exp exp;
+  Identifier id;
+  ExpList expList = new ExpList(); }
+{
+  exp = ExpSingle() <DOT> id = ID() <LPAREN> expList = ExpList() <RPAREN>
+  { return new Call(exp , id , expList); }
+}
+
+Exp ExpAlocate() :
+{ Identifier id; }
+{ <NEW> id=ID() <LPAREN> <RPAREN>
+{ return new NewObject(id); }
+}
+
+Identifier ID() :
+{Token t;}
+{ 
+  t = <ID> { return new Identifier(t.image); } 
+}
+
+
+Exp ExpNot() :
+{ Exp exp; }
+{ <NOT> exp = Exp() { return new Not(exp); }
+}
+
+Exp ExpPar() :
+{ Exp exp; }
+{ <LPAREN> exp=Exp() <RPAREN> { return exp; }
+}
+
+
+
+
+ExpList ExpList():
+{
+	Exp exp;
+	ExpList expList = new ExpList();
+}
+{
+	 exp = Exp()
+	 (exp = ExpRest() {expList.addElement(exp); })*
+	{
+		return expList;
+	}
+	 
+	|
+	{
+		return new ExpList();
+	} 
+}
+
+Exp ExpRest():
+{
+	Exp exp;
+}
+{
+	< COMMA >
+	exp = Exp()
+	{
+		return exp;
+	}
+}
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+

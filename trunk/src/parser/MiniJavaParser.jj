@@ -4,7 +4,7 @@
 options
 {
   JDK_VERSION = "1.5";
-  static = true;
+  static = false;
 }
 
 PARSER_BEGIN(MiniJavaParser)
@@ -13,6 +13,7 @@ import syntaxtree.*;
 import visitor.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 public class MiniJavaParser
 {
@@ -20,11 +21,16 @@ public class MiniJavaParser
   {
       try
       {
-         FileInputStream fi = new FileInputStream("D://Desktop//UFC//Projetos//Eclipse Java Standart Edition//CompilerGroupNine//trunk//src//parser//Sample4.txt");
+         System.out.print("Digite o nome do arquivo que deseja analisar: ");
+         Scanner input = new Scanner (System.in); 
+         String arquivo;
+         arquivo = input.next();
+         String endereco = "D://Desktop//UFC//Projetos//Eclipse Java Standart Edition//CompilerGroupNine//trunk//src//parser//";
+         FileInputStream fi = new FileInputStream(endereco+arquivo);
       	 System.setIn(fi);
           Program p = new MiniJavaParser(System.in).Goal();
           System.out.println("Lexical analysis successfull\n\n");
-          //p.accept(new PrettyPrintVisitor());
+          p.accept(new PrettyPrintVisitor());
           //SymbolTableCreatorVisitor symbolTable = new SymbolTableCreatorVisitor();
           //p.accept(symbolTable);         
       }
@@ -44,15 +50,6 @@ public class MiniJavaParser
 }
 
 PARSER_END(MiniJavaParser)
-
-
-SKIP: {
-  " "
-| "\n"
-| "\r" 
-| "\r\n"
-| "\t"
-}
 
 /* Palavras Reservadas*/
 TOKEN :
@@ -102,6 +99,33 @@ TOKEN : {
 | < ID: <LETTER> (<LETTER> | "_" | <DIGIT>)* >
 | < NUM: (<DIGIT>)+ >
 }
+
+// Trata comentários em uma única linha
+MORE : {
+"//": IN_SINGLE_LINE_COMMENT }
+      
+< IN_SINGLE_LINE_COMMENT > SPECIAL_TOKEN : {
+< SINGLE_LINE_COMMENT: "\n"|"\r"|"\r\n" > : DEFAULT }
+      
+< IN_SINGLE_LINE_COMMENT > MORE : {
+<  ~[] > }
+
+// Trata comentários de multiplas linhas e aninhados
+  TOKEN_MGR_DECLS : {int commentNestingDepth ;}
+             SKIP : {  "/*" { commentNestingDepth = 1 ; } : COMMENT }
+< COMMENT >  SKIP : {  "/*" { commentNestingDepth += 1 ; } }
+< COMMENT >  SKIP : {  "*/"
+                    { commentNestingDepth -= 1; SwitchTo( commentNestingDepth==0 ? DEFAULT : COMMENT ) ; } }
+< COMMENT >  SKIP : {  < ~[] > }
+
+//Ignora alguns caracteres que não participam das producões da gramática
+SKIP: {
+  " "
+| "\n"
+| "\r" 
+| "\t"
+}
+
 
 /*
 *	MiniJava Grammar
@@ -369,8 +393,8 @@ Statement Statement () :
 	|LOOKAHEAD (2)
 	 id = < ID >
 	 < LBRACKET >
-	 < RBRACKET >
 	 exp = Exp()
+	 < RBRACKET >
 	 <  EQUAL >
 	 exp2 = Exp()
 	 < SEMICOLON >

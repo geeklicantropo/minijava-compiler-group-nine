@@ -4,6 +4,8 @@ import java.util.Hashtable;
 
 public class ProgramTable {
 
+		private String name;
+		
         private final Hashtable<Symbol, ClassTable> programClasses = new Hashtable<Symbol, ClassTable>();
 
         public boolean addClass(String className, ClassTable value) {

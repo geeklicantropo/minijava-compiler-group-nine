@@ -25,14 +25,14 @@ public class MiniJavaParser
          Scanner input = new Scanner (System.in); 
          String arquivo;
          arquivo = input.next();
-         String endereco = "D://Desktop//UFC//Projetos//Eclipse Java Standart Edition//CompilerGroupNine//trunk//src//parser//";
+         String endereco = "//home//yuri//workspace//CompilerGroupNine//src//parser//";
          FileInputStream fi = new FileInputStream(endereco+arquivo);
       	 System.setIn(fi);
-          Program p = new MiniJavaParser(System.in).Goal();
-          System.out.println("Lexical analysis successfull\n\n");
-          p.accept(new PrettyPrintVisitor());
-          //SymbolTableCreatorVisitor symbolTable = new SymbolTableCreatorVisitor();
-          //p.accept(symbolTable);         
+         Program p = new MiniJavaParser(System.in).Goal();
+         System.out.println("Lexical analysis successfull\n\n");
+         p.accept(new PrettyPrintVisitor());
+         CreateTableVisitor symbolTable = new CreateTableVisitor();
+         p.accept(symbolTable);         
       }
       catch (ParseException e)
       {
@@ -100,7 +100,7 @@ TOKEN : {
 | < NUM: (<DIGIT>)+ >
 }
 
-// Trata comentários em uma única linha
+// Trata comentï¿½rios em uma ï¿½nica linha
 MORE : {
 "//": IN_SINGLE_LINE_COMMENT }
       
@@ -110,7 +110,7 @@ MORE : {
 < IN_SINGLE_LINE_COMMENT > MORE : {
 <  ~[] > }
 
-// Trata comentários de multiplas linhas e aninhados
+// Trata comentï¿½rios de multiplas linhas e aninhados
   TOKEN_MGR_DECLS : {int commentNestingDepth ;}
              SKIP : {  "/*" { commentNestingDepth = 1 ; } : COMMENT }
 < COMMENT >  SKIP : {  "/*" { commentNestingDepth += 1 ; } }
@@ -118,7 +118,7 @@ MORE : {
                     { commentNestingDepth -= 1; SwitchTo( commentNestingDepth==0 ? DEFAULT : COMMENT ) ; } }
 < COMMENT >  SKIP : {  < ~[] > }
 
-//Ignora alguns caracteres que não participam das producões da gramática
+//Ignora alguns caracteres que nï¿½o participam das producï¿½es da gramï¿½tica
 SKIP: {
   " "
 | "\n"

@@ -4,15 +4,13 @@ import java.util.Hashtable;
 
 public class ProgramTable {
 
-		private String name;
-		
-        private final Hashtable<Symbol, ClassTable> programClasses = new Hashtable<Symbol, ClassTable>();
+		private final Hashtable<Symbol, ClassTable> programClasses = new Hashtable<Symbol, ClassTable>();
 
-        public boolean addClass(String className, ClassTable value) {
-                if (programClasses.containsKey(Symbol.symbol(className)))
+        public boolean addClass(Symbol className, ClassTable value) {
+                if (programClasses.containsKey(className))
                         return false;
                 else {
-                        programClasses.put(Symbol.symbol(className), value);
+                        programClasses.put(className, value);
                         return true;
                 }
         }

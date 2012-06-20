@@ -39,6 +39,7 @@ public class CreateTableVisitor implements Visitor {
 
 		programTable.addClass(Symbol.symbol(name), currentClass);
 		currentClass = programTable.getClass(Symbol.symbol(name));
+		System.out.println(name);
 
 		currentClass.addMethod(Symbol.symbol("main"), new MethodTable("main", new IdentifierType ("void")));
 		currentMethod = currentClass.getMethod(Symbol.symbol("main"));
@@ -61,8 +62,10 @@ public class CreateTableVisitor implements Visitor {
 			hasError("classe " + n.i.toString() + " já declarada.");
 		}
 		currentClass = programTable.getClass(Symbol.symbol(name));
+		System.out.println(name);
 
 		for (int i = 0; i < vl.size(); i++) {
+			System.out.println(i);
 			n.vl.elementAt(i).accept(this);
 		}
 
@@ -109,11 +112,11 @@ public class CreateTableVisitor implements Visitor {
 
 		if (currentMethod == null) {
 			if (!currentClass.addField(Symbol.symbol(varName), varType)) {
-				hasError("Variável" + varName + " já definida.");
-			} else {
-				if (!currentMethod.addLocal(Symbol.symbol(varName), varType)) {
-					hasError("Variável Local " + varName + " já declarada.");
-				}
+				hasError("Variável " + varName + " já definida.");
+			}
+		} else {
+			if (!currentMethod.addLocal(Symbol.symbol(varName), varType)) {
+				hasError("Variável Local " + varName + " já declarada."); 
 			}
 		}
 	}

@@ -32,7 +32,7 @@ public class MiniJavaParser
          System.out.println("Lexical analysis successfull\n\n");
          p.accept(new PrettyPrintVisitor());
          CreateTableVisitor symbolTable = new CreateTableVisitor();
-         p.accept(symbolTable);         
+         p.accept(symbolTable);  
       }
       catch (ParseException e)
       {

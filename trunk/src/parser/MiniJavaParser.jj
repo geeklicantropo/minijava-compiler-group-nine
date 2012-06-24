@@ -25,14 +25,16 @@ public class MiniJavaParser
          Scanner input = new Scanner (System.in); 
          String arquivo;
          arquivo = input.next();
-         String endereco = "//home//yuri//workspace//CompilerGroupNine//src//parser//";
+         String endereco = "C://Users//Yuri//workspace//CompilerGroupNine//src//parser//";
          FileInputStream fi = new FileInputStream(endereco+arquivo);
       	 System.setIn(fi);
          Program p = new MiniJavaParser(System.in).Goal();
-         System.out.println("Lexical analysis successfull\n\n");
+         System.out.println("Análise léxica bem-sucedida.");
+         System.out.println("Imprimindo o programa completo:");
          p.accept(new PrettyPrintVisitor());
          CreateTableVisitor symbolTable = new CreateTableVisitor();
-         p.accept(symbolTable);  
+         p.accept(symbolTable);
+         System.out.println("Tabela de Símbolos criada com sucesso.");  
       }
       catch (ParseException e)
       {

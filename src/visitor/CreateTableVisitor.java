@@ -39,7 +39,6 @@ public class CreateTableVisitor implements Visitor {
 
 		programTable.addClass(Symbol.symbol(name), currentClass);
 		currentClass = programTable.getClass(Symbol.symbol(name));
-		System.out.println(name);
 
 		currentClass.addMethod(Symbol.symbol("main"), new MethodTable("main", new IdentifierType ("void")));
 		currentMethod = currentClass.getMethod(Symbol.symbol("main"));
@@ -59,10 +58,9 @@ public class CreateTableVisitor implements Visitor {
 		currentClass = new ClassTable();
 
 		if (!programTable.addClass(Symbol.symbol(name), currentClass)) {
-			hasError("classe " + n.i.toString() + " j√° declarada.");
+			hasError("classe " + n.i.toString() + " j· declarada.");
 		}
 		currentClass = programTable.getClass(Symbol.symbol(name));
-		System.out.println(name);
 
 		for (int i = 0; i < vl.size(); i++) {
 			System.out.println(i);
@@ -86,11 +84,11 @@ public class CreateTableVisitor implements Visitor {
 		currentBaseClass = programTable.getClass(Symbol.symbol(baseClass));
 
 		if (currentBaseClass == null) {
-			hasError("Superclasse " + baseClass + " ainda nÔøΩo declarada.");
+			hasError("Superclasse " + baseClass + " ainda n„o declarada.");
 		}
 
 		if (!programTable.addClass(Symbol.symbol(name), currentBaseClass)) {
-			hasError("Classe " + name + " j√° declarada. ");
+			hasError("Classe " + name + " j· declarada. ");
 		}
 
 		currentClass = programTable.getClass(Symbol.symbol(name));
@@ -112,11 +110,11 @@ public class CreateTableVisitor implements Visitor {
 
 		if (currentMethod == null) {
 			if (!currentClass.addField(Symbol.symbol(varName), varType)) {
-				hasError("Vari√°vel " + varName + " j√° definida.");
+				hasError("Vari·vel " + varName + " j· definida.");
 			}
 		} else {
 			if (!currentMethod.addLocal(Symbol.symbol(varName), varType)) {
-				hasError("Vari√°vel Local " + varName + " j√° declarada."); 
+				hasError("Vari·vel Local " + varName + " j· declarada."); 
 			}
 		}
 	}
@@ -129,7 +127,7 @@ public class CreateTableVisitor implements Visitor {
 		FormalList fl = n.fl;
 
 		if (!currentClass.addMethod(Symbol.symbol(nome), new MethodTable (nome, tipo))) {
-			hasError("M√©todo" + nome + " j√° existe na classe "
+			hasError("MÈtodo" + nome + " j· existe na classe "
 					+ currentClass.toString());
 		}
 
@@ -150,7 +148,7 @@ public class CreateTableVisitor implements Visitor {
 		String nome = n.i.toString();
 
 		if (!currentMethod.addParam(Symbol.symbol(nome), tipo)) {
-			hasError("Par√¢metro " + nome + " j√° existe no m√©todo "
+			hasError("Par‚metro " + nome + " j· existe no mÈtodo "
 					+ currentMethod.toString());
 		}
 	}

@@ -6,7 +6,9 @@ import IRvisitor.TempVisitor;
 
 public class ExpStm extends Stm {
 
-    public Exp exp; 
+    public Exp exp;
+	public ExpStm left;
+	public ExpStm right;
 
     public ExpStm(Exp e) {
             exp=e;

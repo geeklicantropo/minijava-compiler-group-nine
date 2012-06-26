@@ -15,5 +15,5 @@ public abstract class Frame implements TempMap
   public abstract Temp RA();
   public abstract IRTree2.Exp externalCall(String func, IRTree2.ExpList args);
   public abstract String tempMap(Temp temp);
-  public abstract Assem.InstrList codegen(IRTree2.Stm s);
+  //public abstract Assem.InstrList codegen(IRTree2.Stm s);
 }
